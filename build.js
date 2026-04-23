@@ -13,7 +13,8 @@ import { CHROME_CSS } from "./lib/chrome.js";
 import { PRINT_CSS } from "./lib/print-css.js";
 import { STAGE_JS } from "./lib/stage.js";
 import { REVIEW_CSS, REVIEW_HTML, REVIEW_JS } from "./lib/review.js";
-import { resolveDesignSystem, loadODS, loadBrandSidecar, inlineImages } from "./lib/assets.js";
+import { resolveDesignSystem, loadODS, loadBrandSidecar, brandToCss, inlineImages } from "./lib/assets.js";
+import { familyToCss } from "./lib/family-presets.js";
 import { clearCache } from "./lib/image-gen.js";
 import { lintDeck, formatWarnings } from "./lib/lint.js";
 import { buildPDF } from "./lib/pdf.js";
@@ -80,13 +81,13 @@ function ask(q) {
   });
 }
 
-function buildShell({ title, fontB64, odsCss, deckCss, layoutCss, slidesHtml, total }) {
+function buildShell({ title, fontB64, odsCss, deckCss, layoutCss, brandCss, slidesHtml, total }) {
   const tplPath = path.join(__dirname, "templates", "shell.html");
   let tpl = fs.readFileSync(tplPath, "utf8");
   return tpl
     .replace("{{TITLE}}", escapeHTML(title))
     .replace("{{FONT_B64}}", fontB64)
-    .replace("{{ODS_CSS}}", odsCss + "\n" + layoutCss)
+    .replace("{{ODS_CSS}}", odsCss + "\n" + layoutCss + (brandCss ? "\n" + brandCss : ""))
     .replace("{{DECK_CSS}}", deckCss)
     .replace("{{PRINT_CSS}}", PRINT_CSS)
     .replace("{{CHROME_CSS}}", CHROME_CSS)
@@ -149,7 +150,7 @@ async function main() {
   const { odsCss, deckCss, fontB64, logoSvg } = loadODS(ds);
 
   // 4) Lint
-  const warnings = lintDeck(slides);
+  const warnings = lintDeck(slides, { accent: fm.accent });
   if (warnings.length) {
     console.log(`⚠ lint: ${warnings.length} warning(s)`);
     console.log(formatWarnings(warnings));
@@ -218,10 +219,13 @@ async function main() {
   for (const s of slides) layoutDist[s.layout] = (layoutDist[s.layout] || 0) + 1;
 
   // 11) Compose & write HTML
+  // Family preset goes first (most generic), then explicit brand sidecar wins.
+  const brandCss = [familyToCss(fm.family), brandToCss(fm)].filter(Boolean).join("\n");
   const html = buildShell({
     title: fm.title || path.basename(inputPath, ".md"),
     fontB64, odsCss, deckCss,
     layoutCss: LAYOUT_CSS,
+    brandCss,
     slidesHtml,
     total,
   });
