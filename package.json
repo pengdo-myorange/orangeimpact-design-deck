@@ -1,0 +1,12 @@
+{
+  "name": "design-deck",
+  "version": "0.1.0",
+  "description": "Convert markdown to a 1920x1080 print-to-PDF-ready HTML slide deck with the Orangeimpact Design System.",
+  "type": "module",
+  "bin": {
+    "design-deck": "./build.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

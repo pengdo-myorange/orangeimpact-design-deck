@@ -1,0 +1,27 @@
+/* =============================================================================
+   design-deck — deck.css
+   Deck-specific token overlay on top of ODS colors_and_type.css.
+   Keep this thin: only presentation-mode sizes that don't belong in product UI.
+   ============================================================================= */
+
+:root {
+  /* Oversized heading sizes for 1920x1080 stage */
+  --deck-heading-hero: 160px;       /* section-divider, statement */
+  --deck-heading-hero-lh: 1.05;
+  --deck-heading-xl: 120px;         /* title slide */
+  --deck-heading-xl-lh: 1.08;
+  --deck-heading-l: 72px;           /* quote */
+  --deck-heading-l-lh: 1.15;
+  --deck-heading-m: 56px;           /* slide H1 (content, bento, etc.) */
+  --deck-heading-m-lh: 1.2;
+  --deck-heading-s: 40px;           /* card title, eyebrow H2 */
+  --deck-heading-s-lh: 1.25;
+
+  /* Oversized data numerals for stats/big-number */
+  --deck-number-mega: 280px;        /* big-number hero */
+  --deck-number-mega-lh: 0.95;
+  --deck-number-big: 160px;         /* stats cells */
+  --deck-number-big-lh: 1.0;
+
+  /* Body scale stays 18/16/14/12 (inherited from ODS). */
+}

@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+/* ============================================================
+   Pretendard (base64-embedded) — fonts stay intact in print.
+   ============================================================ */
+@font-face {
+  font-family: "Pretendard Variable";
+  font-weight: 45 920;
+  font-style: normal;
+  font-display: swap;
+  src: url("data:font/woff2;base64,{{FONT_B64}}") format("woff2-variations");
+}
+
+/* ============================================================
+   ODS tokens + deck overlay
+   ============================================================ */
+{{ODS_CSS}}
+{{DECK_CSS}}
+
+/* ============================================================
+   Stage shell
+   ============================================================ */
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #111;
+  color: var(--fg-normal);
+  font-family: var(--font-sans);
+  overflow: hidden;
+}
+
+.deck {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sl {
+  width: 1920px;
+  height: 1080px;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: top left;
+  background: var(--bg-canvas);
+  color: var(--fg-strong);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.sl[data-theme="dark"] {
+  background: var(--neutral-950);
+  color: var(--fg-on-brand);
+}
+
+/* Screen: show only active slide, scaled */
+@media screen {
+  .sl { display: none; }
+  .sl.is-active { display: block; }
+}
+
+/* Print: every slide its own page, unscaled */
+{{PRINT_CSS}}
+
+/* ============================================================
+   Chrome (breadcrumb / meta / source / page)
+   ============================================================ */
+{{CHROME_CSS}}
+
+/* ============================================================
+   Deck-level UI (counter, review overlay toggle)
+   ============================================================ */
+.deck-counter {
+  position: fixed;
+  right: 24px;
+  bottom: 16px;
+  z-index: 100;
+  font: 500 14px/1.4 var(--font-sans);
+  color: rgba(255,255,255,0.55);
+  font-feature-settings: "tnum" 1;
+  pointer-events: none;
+}
+
+{{REVIEW_CSS}}
+
+/* ============================================================
+   Layouts (shared card/marker primitives)
+   ============================================================ */
+.sl-body {
+  position: absolute;
+  inset: 0;
+  padding: 96px 120px 72px;
+  display: flex;
+  flex-direction: column;
+}
+.sl-title {
+  font-size: var(--deck-heading-m);
+  line-height: var(--deck-heading-m-lh);
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--fg-strong);
+  margin: 0 0 24px;
+}
+.sl-eyebrow {
+  font-size: 16px;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--fg-alternative);
+  margin: 0 0 16px;
+  letter-spacing: 0;
+}
+.sl-orange { color: var(--brand); }
+.sl-blue { color: var(--accent); }
+.sl-body p {
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--fg-normal);
+  margin: 0 0 16px;
+  text-wrap: pretty;
+}
+.sl-body ul, .sl-body ol {
+  margin: 0 0 16px;
+  padding-left: 28px;
+}
+.sl-body ul li {
+  list-style: none;
+  position: relative;
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--fg-normal);
+}
+.sl-body ul li::before {
+  content: "";
+  position: absolute;
+  left: -20px;
+  top: 12px;
+  width: 6px;
+  height: 6px;
+  background: var(--brand);
+  border-radius: 2px;
+}
+.sl-body ol li {
+  margin: 0 0 12px;
+  font-size: 18px;
+  line-height: 28px;
+}
+.sl-body strong { font-weight: 700; color: var(--fg-strong); }
+.sl-body em { font-style: italic; }
+.sl-body code {
+  font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+  font-size: 0.9em;
+  background: var(--bg-muted);
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+.sl-body a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.sl-card {
+  background: var(--bg-canvas);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 32px;
+}
+.sl-card-tint {
+  background: var(--bg-brand-tint);
+  border-color: transparent;
+}
+.sl-card-subtle {
+  background: var(--bg-subtle);
+  border-color: transparent;
+}
+
+.sl[data-theme="dark"] .sl-title,
+.sl[data-theme="dark"] .sl-body p,
+.sl[data-theme="dark"] .sl-body li {
+  color: rgba(255,255,255,0.92);
+}
+.sl[data-theme="dark"] .sl-eyebrow { color: rgba(255,255,255,0.55); }
+.sl[data-theme="dark"] .sl-card {
+  background: #fff;
+  color: var(--fg-strong);
+}
+</style>
+</head>
+<body>
+<div class="deck" id="deck">
+{{SLIDES}}
+</div>
+<div class="deck-counter" id="deck-counter">1 / {{TOTAL}}</div>
+{{REVIEW_HTML}}
+
+<script>
+{{STAGE_JS}}
+</script>
+<script>
+{{REVIEW_JS}}
+</script>
+</body>
+</html>
