@@ -79,7 +79,7 @@ build.js <input.md> [options]
 --design-system <path>    ODS 경로 오버라이드
 --theme light|dark        기본 테마
 --assets-folder           sibling assets 폴더로 출력
---pdf                     헤드리스 Chrome으로 PDF 생성
+--pdf                     PDF 생성 (Playwright 우선, 없으면 Chrome headless)
 --slide <N[,N]>           지정 슬라이드만 단독 렌더
 --merge <N>               preview/slide-N.html을 메인 덱에 머지
 --no-image-gen            AI 이미지 placeholder 처리
@@ -87,7 +87,37 @@ build.js <input.md> [options]
 --clear-cache             이미지 캐시 삭제
 --interactive             1장씩 순차 모드
 --yes                     비용 확인 자동 승인
+--showcase                ≥5장 덱에서 grammar 정의용 2장만 빌드 → <out>.showcase.html
+--verify                  빌드 후 자동 검증 (슬라이드 수, 폰트, @page 규칙)
+--strict                  lint warning 1건이라도 있으면 빌드 실패
 ```
+
+## Brand sidecar
+
+md 파일과 같은 디렉토리에 `brand.md` 가 있으면 자동 로드. 프론트매터 필드를 오버라이드합니다.
+
+```yaml
+---
+accent: blue        # 또는 "#0075FF"
+theme: dark
+chapter: "Q2 2026"  # 모든 슬라이드 기본 브레드크럼
+logo: ./my-logo.svg
+---
+```
+
+## Lint 규칙
+
+빌드 시 자동 실행. 위반 시 콘솔 경고 + `output.build.json.warnings[]` 기록.
+
+| 규칙 | 의미 |
+|---|---|
+| `no-emoji` | 본문 emoji 금지 |
+| `no-data-slop` | "10,000+ users" 같은 출처 없는 큰 숫자 패턴 금지 |
+| `no-gradient` | linear/radial-gradient 금지 |
+| `no-svg-imagery` | 인라인 SVG 곡선 path (사람·사물 그림 의심) 금지 |
+| `ai-prompt-slop` | AI 프롬프트에 gradient/purple/neon/cyberpunk 금지 |
+
+`--strict` 로 빌드 실패 처리, 또는 슬라이드 시작에 `<!-- lint: off -->` 로 건너뛰기.
 
 ## 폴더 구조
 

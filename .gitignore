@@ -4,6 +4,11 @@ preview/
 dist/
 out/
 
+# Generated deck output (rebuild from .md)
+examples/*.html
+examples/*.build.json
+examples/*.pdf
+
 # Image generation cache (rebuild via API)
 .design-deck-cache/
 

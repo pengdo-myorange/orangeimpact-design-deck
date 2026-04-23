@@ -27,24 +27,44 @@ allowed-tools:
    - `--design-system <path>` 플래그
    - md 파일 디렉토리의 `./Orangeimpact Design System/`
    - 벤더링된 `~/.claude/skills/design-deck/design-system/` (기본값)
-3. **API key check.** md 파일에 `ai:` 이미지 레퍼런스가 있으면 `$OPENAI_API_KEY` 존재 확인. 없으면 사용자에게 안내하거나 `--no-image-gen` 추천.
-4. **Phase 1 — 일괄 드래프트 빌드:**
+3. **Brand sidecar (optional).** md 파일과 같은 폴더에 `brand.md` 가 있으면 자동 로드. 프론트매터의 `accent / theme / chapter` 등을 오버라이드.
+4. **API key check.** md 파일에 `ai:` 이미지 레퍼런스가 있으면 `$OPENAI_API_KEY` 존재 확인. 없으면 사용자에게 안내하거나 `--no-image-gen` 추천.
+5. **Phase 0 (≥5장 덱일 때만) — Showcase first:**
    ```bash
-   node ~/.claude/skills/design-deck/build.js <input.md> --mode draft
+   node ~/.claude/skills/design-deck/build.js <input.md> --showcase --mode draft
    ```
-   AI 이미지는 placeholder SVG로 대체. 출력 `deck.html` 을 macOS는 `open`, 리눅스는 `xdg-open`으로 Chrome에 띄운다.
-5. **Phase 2 — 리뷰 마킹 안내:** 사용자에게 두 가지 선택지를 제공:
-   - 드래프트 HTML 하단 `[리뷰 모드]` 토글 → 슬라이드별 [승인]/[수정 요청]/[이미지 재생성] 버튼 사용 → `[내보내기]`로 `revisions.yaml` 저장
-   - 또는 자연어로 "3번 제목 짧게, 7번 이미지 교체" 같은 지시 → Claude가 `revisions.yaml` 작성
-6. **Phase 3 — 타깃 수정 반복:** `revisions.yaml` 을 읽어 마킹된 슬라이드만 수정 → `--slide N` 로 단독 프리뷰 → 승인되면 `--merge N` 로 메인 덱에 머지.
-7. **Finalize.** 사용자가 "최종 빌드" 하면:
+   2장(가장 다른 레이아웃 두 개)만 빌드해 `<input>.showcase.html` 출력. 사용자에게 "이 그래머(색·간격·타이포 톤)가 맞나요?" 확인 후에만 일괄 빌드. 방향 잘못 잡고 50장 다 그리는 비용을 회피.
+6. **Phase 1 — 일괄 드래프트 빌드:**
    ```bash
-   node ~/.claude/skills/design-deck/build.js <input.md> --mode final --pdf
+   node ~/.claude/skills/design-deck/build.js <input.md> --mode draft --verify
+   ```
+   AI 이미지는 placeholder SVG로 대체. 빌드 후 자동 검증 (슬라이드 수, 폰트 임베드, @page 규칙). 출력 `deck.html` 을 `open` 으로 Chrome에 띄움.
+7. **Phase 2 — 리뷰 마킹 안내:** 사용자에게 두 가지 선택지를 제공:
+   - 하단 `[리뷰 모드]` 토글 → 슬라이드별 [승인]/[수정 요청]/[이미지 재생성]/[★ 비평] 버튼 → `[내보내기]`로 `revisions.yaml` 저장. **5축 비평** (철학/계층/디테일/기능/창의 0-10점) 도 슬라이드마다 매길 수 있음.
+   - 또는 자연어로 "3번 제목 짧게, 7번 이미지 교체" 같은 지시 → Claude가 `revisions.yaml` 작성
+8. **Phase 3 — 타깃 수정 반복:** `revisions.yaml` 을 읽어 마킹된 슬라이드만 수정 → `--slide N` 로 단독 프리뷰 → 승인되면 `--merge N` 로 메인 덱에 머지.
+9. **Finalize.**
+   ```bash
+   node ~/.claude/skills/design-deck/build.js <input.md> --mode final --pdf --verify
    ```
    - `--mode final` → AI 이미지 실제 생성 (OpenAI `gpt-image-2`, SHA-256 캐시)
-   - `--pdf` → 헤드리스 Chrome으로 `.pdf` 자동 생성
+   - `--pdf` → Playwright 우선 → 없으면 헤드리스 Chrome으로 `.pdf` 자동 생성
    - 빌드 시작 시 예상 비용을 사용자에게 표시하고 진행 여부 확인
-8. **Done.** `deck.pdf` 경로 전달. 사용자가 옵션을 조정하고 싶으면 HTML을 Chrome에서 열어 `Cmd+P` 수동 루트 안내.
+10. **Done.** `deck.pdf` 경로 전달. 사용자가 옵션을 조정하고 싶으면 HTML을 Chrome에서 열어 `Cmd+P` 수동 루트 안내.
+
+## Lint rules (auto)
+
+빌드 시 자동 실행. 위반은 `output.build.json.warnings[]` 에 기록 + 콘솔 경고. `--strict` 면 빌드 실패.
+
+| 규칙 | 의미 |
+|---|---|
+| `no-emoji` | 본문에 emoji 사용 금지 (체크 마크/화살표 같은 텍스트 심볼은 OK) |
+| `no-data-slop` | "10,000+ users" 같이 출처 없는 큰 숫자 패턴 금지 |
+| `no-gradient` | `linear-gradient` 등 그라디언트 인라인 사용 금지 |
+| `no-svg-imagery` | 인라인 SVG `<path>` 의 곡선 명령 (사람·사물 그림 의심) 금지 |
+| `ai-prompt-slop` | AI 이미지 프롬프트에 `gradient/purple/neon/cyberpunk` 포함 금지 |
+
+슬라이드 시작에 `<!-- lint: off -->` 추가 시 해당 슬라이드 검사 건너뜀.
 
 ## CLI reference
 
@@ -65,6 +85,10 @@ Options:
   --clear-cache             이미지 캐시 삭제
   --interactive             1장씩 순차 빌드·확인 모드
   --yes                     비용 확인 프롬프트 자동 승인
+  --showcase                ≥5장 덱에서 grammar 정의용 2장만 빌드 → <out>.showcase.html
+  --verify                  빌드 후 자동 검증 (슬라이드 수, 폰트, @page, console 에러)
+  --strict                  lint warning 1건이라도 있으면 빌드 실패
+  --critique                --verify alias
 ```
 
 ## Markdown syntax (cheat sheet)
