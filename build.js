@@ -81,7 +81,7 @@ function ask(q) {
   });
 }
 
-function buildShell({ title, fontB64, odsCss, deckCss, layoutCss, brandCss, slidesHtml, total }) {
+function buildShell({ title, fontB64, odsCss, deckCss, layoutCss, brandCss, slidesHtml, total, mermaidScript }) {
   const tplPath = path.join(__dirname, "templates", "shell.html");
   let tpl = fs.readFileSync(tplPath, "utf8");
   return tpl
@@ -96,7 +96,8 @@ function buildShell({ title, fontB64, odsCss, deckCss, layoutCss, brandCss, slid
     .replace("{{TOTAL}}", String(total))
     .replace("{{REVIEW_HTML}}", REVIEW_HTML)
     .replace("{{STAGE_JS}}", STAGE_JS)
-    .replace("{{REVIEW_JS}}", REVIEW_JS);
+    .replace("{{REVIEW_JS}}", REVIEW_JS)
+    .replace("{{MERMAID_SCRIPT}}", mermaidScript || "");
 }
 
 function pickShowcaseSlides(slides) {
@@ -226,6 +227,13 @@ async function main() {
   // 11) Compose & write HTML
   // Family preset goes first (most generic), then explicit brand sidecar wins.
   const brandCss = [familyToCss(fm.family), brandToCss(fm)].filter(Boolean).join("\n");
+  // Mermaid: lazy-load from CDN only if the deck uses it. Keeps the default
+  // output self-contained; opt-in for diagrams that need more than :::flow.
+  const usesMermaid = slidesHtml.includes('class="sl-mermaid mermaid"');
+  const mermaidScript = usesMermaid
+    ? `\n<script type="module">import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';mermaid.initialize({startOnLoad:true,theme:'base',themeVariables:{primaryColor:'#FFE6D1',primaryTextColor:'#171717',primaryBorderColor:'#FF6F1F',lineColor:'#737373',fontFamily:'Pretendard Variable, Pretendard, sans-serif'}});</script>`
+    : "";
+  if (usesMermaid) console.log(`ℹ Mermaid detected — viewer needs internet (CDN load)`);
   const html = buildShell({
     title: fm.title || path.basename(inputPath, ".md"),
     fontB64, odsCss, deckCss,
@@ -233,6 +241,7 @@ async function main() {
     brandCss,
     slidesHtml,
     total,
+    mermaidScript,
   });
   fs.writeFileSync(outForThisRun, html);
   const sizeKb = (Buffer.byteLength(html, "utf8") / 1024).toFixed(0);
