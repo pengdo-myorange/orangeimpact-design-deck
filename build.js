@@ -202,17 +202,22 @@ async function main() {
     return;
   }
 
-  // 9) Render slides
-  const total = renderSet.length;
-  const ctx = {
+  // 9) Render slides. Some layouts (e.g. section-divider without a hero
+  // title) intentionally return "" so the slide is skipped. We render first,
+  // then drop empties and recount so the total and chrome page numbers line up.
+  const provisionalCtx = {
     fm,
-    total,
+    total: renderSet.length,
     logoSvg,
     autoMeta: () => "",
   };
-  // Re-index for chrome page numbers
-  const reindexed = renderSet.map((s, i) => ({ ...s, index: i }));
-  const slidesHtml = reindexed.map((s) => renderSlide(s, ctx)).join("\n");
+  const firstPass = renderSet.map((s, i) => renderSlide({ ...s, index: i }, provisionalCtx));
+  const kept = renderSet.filter((_, i) => (firstPass[i] || "").trim().length > 0);
+  const skipped = firstPass.length - kept.length;
+  if (skipped > 0) console.log(`ℹ skipped ${skipped} empty slide${skipped === 1 ? "" : "s"} (section-divider without hero)`);
+  const total = kept.length;
+  const ctx = { fm, total, logoSvg, autoMeta: () => "" };
+  const slidesHtml = kept.map((s, i) => renderSlide({ ...s, index: i }, ctx)).join("\n");
 
   // 10) Layout distribution stats
   const layoutDist = {};
