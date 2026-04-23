@@ -98,7 +98,7 @@ html, body {
 .sl-body {
   position: absolute;
   inset: 0;
-  padding: 96px 120px 72px;
+  padding: 128px 120px 72px;
   display: flex;
   flex-direction: column;
 }
@@ -126,6 +126,9 @@ html, body {
   color: var(--fg-normal);
   margin: 0 0 18px;
   text-wrap: pretty;
+  /* Author-controlled line breaks: a newline in the source markdown becomes
+     a visible line break, so one sentence per line renders one-per-line. */
+  white-space: pre-line;
 }
 .sl-body ul, .sl-body ol {
   margin: 0 0 18px;
@@ -138,6 +141,7 @@ html, body {
   font-size: 26px;
   line-height: 38px;
   color: var(--fg-normal);
+  white-space: pre-line;
 }
 .sl-body ul li::before {
   content: "";
