@@ -55,6 +55,10 @@ html, body {
   print-color-adjust: exact;
   overflow: hidden;
   box-shadow: 0 0 0 1px rgba(255,255,255,0.04);
+  /* Korean-aware line wrapping: break at eojeol (whitespace) boundaries, not
+     mid-word. Long English tokens still wrap via overflow-wrap fallback. */
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 .sl[data-theme="dark"] {
