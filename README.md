@@ -31,41 +31,31 @@ design-deck 은 **세 번째를 0 으로 만듭니다.** 마크다운 의도만 
   - macOS: `brew install --cask font-pretendard` 또는 [Pretendard 릴리스](https://github.com/orioncactus/pretendard/releases) 에서 `.otf` → Font Book 으로 설치
   - Windows/Linux: 같은 릴리스 페이지의 OS 별 패키지 사용
 
-## 스킬 설치 (1분)
+## 스킬 설치
 
-Claude Code 는 `~/.claude/skills/` 아래의 폴더를 자동으로 발견합니다. 터미널 세 줄:
+Claude Code 에 한 줄 말하면 됩니다.
 
-```bash
-mkdir -p ~/.claude/skills
-cd ~/.claude/skills
-git clone https://github.com/pengdo-myorange/orangeimpact-design-deck.git design-deck
+```text
+이 스킬 설치해줘: https://github.com/pengdo-myorange/orangeimpact-design-deck
 ```
 
-설치 확인: Claude Code 를 열고 **"design-deck 스킬 있어?"** 라고 물어보면 이 README 를 읽고 "있습니다" 라고 답합니다.
+Claude 가 `~/.claude/skills/design-deck/` 에 자동으로 `git clone` 합니다. 설치 확인은 **"design-deck 스킬 있어?"** 라고 물어보면 됩니다.
 
 ## 처음 써보기 — Claude Code 에 대화만 하세요
 
 Claude Code 데스크톱 앱을 쓰는 초보자를 위한 가장 자연스러운 경로입니다. 터미널에서 `node ...` 를 기억하지 않아도 됩니다 — Claude 가 대신 실행합니다.
 
-### A1. 콘텐츠 → 스킬용 md 로 변환
+### A1. 콘텐츠를 그대로 붙여넣기
 
-이 스킬이 이해하는 마크다운 문법(프론트매터 + `<!-- layout: ... -->` 디렉티브 + `:::card` 같은 펜스 블록) 으로 바꾸는 일은 Claude 에게 맡기세요. 아래 프롬프트를 그대로 복사해서 내용만 붙여넣으면 됩니다.
+메모·초안·개요·Word 문서 내용을 그대로 붙여넣고 한 줄만 덧붙이면 됩니다.
 
-````text
-다음 내용을 design-deck 스킬용 슬라이드 마크다운으로 만들어줘.
-규칙:
-- ~/.claude/skills/design-deck/SKILL.md 의 마크다운 문법을 따를 것
-- 최소 레이아웃 디렉티브(<!-- layout: ... -->)만 써서 복잡하지 않게
-- 첫 슬라이드는 title, 데이터/수치 슬라이드는 big-number 또는 stats,
-  비교는 compare, 본문은 content, 마무리는 closing
-- 출처가 있으면 <!-- source: "출처" --> 로 하단에 표기
-- 파일은 ~/Desktop/<파일명>.md 로 저장해줘
+```text
+다음 내용으로 design-deck 슬라이드 만들어줘.
 
-== 내용 ==
-<여기에 메모·초안·개요를 그대로 붙여넣기>
-````
+<여기에 내용 붙여넣기>
+```
 
-Claude 는 `SKILL.md` 를 읽어 현재 지원하는 레이아웃을 확인한 뒤, 내용을 슬라이드 단위로 쪼개 `.md` 파일을 작성합니다.
+Claude 가 알아서 `SKILL.md` 를 읽고 레이아웃을 고르고 `.md` 파일을 Desktop 에 저장합니다. 톤이나 구조를 더 다듬고 싶으면 "데이터 슬라이드는 big-number 로" 처럼 한 줄 더 붙이면 됩니다.
 
 ### A2. 생성된 md 확인
 
