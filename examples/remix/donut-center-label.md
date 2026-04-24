@@ -12,16 +12,16 @@ source: design-deck / inspired by sample.pptx
 
 <!-- layout: chart -->
 <!-- chart: donut -->
-# 카테고리 분포 — 분기 API 사용량
+# 일의 재구성, 네 가지 방향
 
 ## OpenAI
 4 categories
 
 :::data
-Code        | 45 | orange
-Chat        | 30 | orange-dark
-Reason      | 15 | blue
-Other       | 10 | gray
+자동화 위험 / Automation-exposed      | 18 | orange-dark
+재구성 / Reshaped                     | 24 | orange
+성장 / Growth                         | 12 | blue
+단기 영향 적음 / Minimally-affected near term | 46 | gray
 :::
 
 ---
