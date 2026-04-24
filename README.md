@@ -291,9 +291,9 @@ component_overrides:
 
 [`examples/brand-test/`](examples/brand-test/) 에 v2 사이드카가 실제로 어떻게 적용되는지 보여주는 smoke test 가 있습니다.
 
-## Family presets — 4개의 톤
+## Family presets — 9개의 톤
 
-`family:` 한 줄로 spacing / radius / shadow / bullet 만 변형됩니다 (ODS 의 컬러·기본 폰트는 보존). [`examples/remix/`](examples/remix/) 에 4개 데모.
+`family:` 한 줄로 spacing / radius / shadow / bullet / 컬러가 변형됩니다. [`examples/remix/`](examples/remix/) 에 9개 데모. family 선택이 애매하면 [`prompts/family-picker.md`](prompts/) 실행.
 
 | Family | 영감 | 변형 |
 |---|---|---|
@@ -301,6 +301,11 @@ component_overrides:
 | `editorial-minimalism` | Linear · Stripe · Vercel | 여백 +20%, shadow none, radius 6px, dash bullet |
 | `data-dense-pro` | PostHog · ClickHouse · Grafana | 여백 −20%, radius 8px, tnum 강제 |
 | `terminal-core` | Ollama · Warp · Raycast | mono 폰트 강제 |
+| `cinematic-dark` | NVIDIA · RunwayML · ElevenLabs | 검정 canvas, ODS 오렌지 accent, 하드 에지 4px radius, 깊은 그림자 |
+| `playful-color` | Figma · Duolingo · Mailchimp | 부드러운 soft shadow, 넉넉한 radius, pill chip, purple brand |
+| `glass-futurism` | Apple · Arc · Spotify | 반투명 레이어(`backdrop-filter` blur+saturate), SF Pro 스택, system blue |
+| `neon-brutalist` | The Verge · PlayStation · Bugatti | 0 radius, 2px 검정 rule, orange accent, shadow 전부 제거 |
+| `indie-cult` | Granola · Criterion · A24 | cream canvas, warm serif 헤드라인, terracotta accent, frosted 카드 |
 
 ## Anti-AI-slop 린터
 
@@ -352,7 +357,10 @@ design-deck/
 ├── examples/
 │   ├── all-layouts.md           # 17 layout showcase (24 slides)
 │   ├── brand-test/              # DESIGN.md v2 sidecar smoke test
-│   └── remix/                   # 4 aesthetic family demos
+│   └── remix/                   # 9 aesthetic family demos
+├── prompts/                    # brand.md 생성 보조 프롬프트
+│   ├── family-picker.md
+│   └── brand-to-brand-md.md
 └── showcase/                    # community PRs
 ```
 
@@ -374,7 +382,6 @@ design-deck/
 - 진짜 WYSIWYG 에디터 (리뷰 오버레이로 대체)
 - gpt-image-2 외 이미지 모델 어댑터
 - 마크다운 테이블 / 푸트노트 / LaTeX
-- 9 family preset 중 5개 (`cinematic-dark`, `playful-color`, `glass-soft-futurism`, `neon-brutalist`, `cult-indie`) — enum 만 받고 `warm-editorial` 폴백
 
 ## 라이선스
 

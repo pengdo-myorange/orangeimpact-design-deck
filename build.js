@@ -148,7 +148,7 @@ async function main() {
 
   // 3) Design system
   const ds = resolveDesignSystem({ flag: args["design-system"], mdDir, skillDir: __dirname });
-  const { odsCss, deckCss, fontB64, logoSvg } = loadODS(ds);
+  const { odsCss, deckCss, fontB64, logoSvg, logoSvgWhite } = loadODS(ds);
 
   // 4) Lint
   const warnings = lintDeck(slides, { accent: fm.accent });
@@ -210,6 +210,7 @@ async function main() {
     fm,
     total: renderSet.length,
     logoSvg,
+    logoSvgWhite,
     autoMeta: () => "",
   };
   const firstPass = renderSet.map((s, i) => renderSlide({ ...s, index: i }, provisionalCtx));
@@ -217,7 +218,7 @@ async function main() {
   const skipped = firstPass.length - kept.length;
   if (skipped > 0) console.log(`ℹ skipped ${skipped} empty slide${skipped === 1 ? "" : "s"} (section-divider without hero)`);
   const total = kept.length;
-  const ctx = { fm, total, logoSvg, autoMeta: () => "" };
+  const ctx = { fm, total, logoSvg, logoSvgWhite, autoMeta: () => "" };
   const slidesHtml = kept.map((s, i) => renderSlide({ ...s, index: i }, ctx)).join("\n");
 
   // 10) Layout distribution stats

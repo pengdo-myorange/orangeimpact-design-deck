@@ -30,7 +30,10 @@ allowed-tools:
 3. **Brand sidecar (optional).** md 파일과 같은 폴더에 `brand.md` 가 있으면 자동 로드. DESIGN.md v2 호환 스펙 (awesome-claude-design):
    - 기본: `accent / theme / chapter / logo`
    - nested: `typography.{headline,body,mono}`, `component_overrides.{card_radius,card_shadow,bullet_shape}`
-   - `family: warm-editorial | editorial-minimalism | data-dense-pro | terminal-core` — 4개 aesthetic family preset (ODS 위에 spacing/radius/shadow 오버레이). 지정 안 하면 기본 ODS 톤 그대로.
+   - `family:` — 9개 aesthetic family preset (ODS 위에 spacing/radius/shadow/color 오버레이):
+     - `warm-editorial` (기본·Claude/Notion) · `editorial-minimalism` (Linear/Stripe) · `data-dense-pro` (PostHog/Grafana) · `terminal-core` (Ollama/Warp)
+     - `cinematic-dark` (NVIDIA/RunwayML) · `playful-color` (Figma/Duolingo) · `glass-futurism` (Apple/Arc) · `neon-brutalist` (The Verge/PlayStation) · `indie-cult` (Granola/Criterion)
+     - 지정 안 하면 기본 ODS 톤 그대로. family 선택이 애매하면 `prompts/family-picker.md` 실행.
 4. **API key check.** md 파일에 `ai:` 이미지 레퍼런스가 있으면 `$OPENAI_API_KEY` 존재 확인. 없으면 사용자에게 안내하거나 `--no-image-gen` 추천.
 5. **Phase 0 (≥5장 덱일 때만) — Showcase first:**
    ```bash
