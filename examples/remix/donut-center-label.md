@@ -46,3 +46,20 @@ Misc        |  8 | gray-light
 # Thank you
 
 ODS 팔레트 alias (`orange`, `orange-dark`, `blue`, `gray` …) 는 모든 차트 타입에 적용됩니다.
+
+---
+
+<!-- layout: statement -->
+# 이미 벌어지는 변화에, 우리는 ==관찰자==인가 ==참여자==인가?
+
+오늘 이 자리는, 여러분이 '==참여자=='가 되는 첫 시간입니다.
+
+---
+
+# Inline highlight syntax
+
+Statement / big-number / stats / bento — 모든 레이아웃에서 동일하게 동작:
+
+- `==text==` → 오렌지 bold 강조 (sample pdf p8/p10/p13/p14 톤)
+- 기존 `**bold**` 는 검정 bold 그대로 (영향 없음)
+- 강조 단어는 슬라이드당 ==1–2개== 권장 — 남발하면 앵커 효과 사라짐
