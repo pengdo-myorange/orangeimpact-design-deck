@@ -281,6 +281,32 @@ theme: light
 - **Donut 중앙 라벨**: 슬라이드에 H1 아래 `## 서브타이틀` + paragraph 가 있으면 도넛 구멍 한가운데에 bold + 회색 2행으로 배치.
 - **범례 2단 라벨**: 라벨에 `/` 가 있으면 (주라벨 bold / 보조라벨 작은 회색) 2행 스택으로 렌더.
 
+**Tufte 기본값** (data-ink 우선):
+
+- `bar` 는 색을 안 주면 **전부 회색**. `<!-- highlight: N -->` 으로 N번째만 brand 로 승격.
+- 막대 오른쪽 끝에 **값 라벨** 자동 표시 (direct labeling).
+- `bar` / `stackedbar` 모서리는 **직각** (`rx="0"`).
+- `pie` 분리선은 얇은 캔버스색 (배경과 연동).
+- **Donut/Pie 순서**: 기본 = `:::data` 작성 순서. 순수 크기 비교면 `<!-- order: magnitude -->`. **`기타`** 라벨은 항상 마지막 슬라이스.
+
+### 차트 (`chart: sparkline`)
+
+Tufte 시그니처. 축 없이 트렌드만 보여주는 워드-사이즈 라인 차트.
+
+```markdown
+<!-- layout: chart -->
+<!-- chart: sparkline -->
+# 최근 30일 DAU
+
+:::data
+DAU | 120 132 128 140 148 155 150 162 178 185 192 200 208 215 | orange
+:::
+```
+
+- value 열은 공백으로 구분된 숫자 시퀀스. 한 줄 = 한 series.
+- 마지막 점만 필드 원 + 값 라벨 — 중간 포인트는 잉크 낭비
+- 여러 줄 = 공유 Y축에 overlay (multi-series)
+
 ## CLI
 
 ```
