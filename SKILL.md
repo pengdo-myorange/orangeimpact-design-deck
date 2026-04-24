@@ -75,6 +75,18 @@ allowed-tools:
 
 슬라이드 시작에 `<!-- lint: off -->` 추가 시 해당 슬라이드 검사 건너뜀.
 
+## Chart defaults (Tufte)
+
+차트 출력은 Edward Tufte 의 data-ink 원칙을 기본값으로 따릅니다.
+
+- **Bar 는 기본 회색 (`--neutral-400`)** — 색은 의미를 가져야 하므로 하이라이트 없는 막대 비교는 회색이 기본. `<!-- highlight: N -->` directive 로 N번째 막대만 brand 오렌지 승격. color 열을 명시하면 그 값이 이김.
+- **`rx="0"` — 둥근 모서리는 데이터를 담지 않는 잉크**. bar · stackedbar 모두 직각.
+- **Direct labeling** — bar 차트는 각 막대 오른쪽 끝에 값 표시. 범례의 value 열 중복 감소.
+- **Donut/Pie 순서** — 기본은 `:::data` 작성 순서 (서사 보존). `<!-- order: magnitude -->` 면 큰 조각부터 시계방향. `기타/other/misc/etc` 라벨은 값과 무관하게 항상 마지막.
+- **Pie 분리선** — `stroke="var(--bg-canvas)"` 1px (테마 연동). 진한 흰 선으로 데이터를 썰지 않음.
+- **Sparkline** (`chart: sparkline`) — 워드-사이즈 트렌드. 축 없음, 중간 점 없음, **마지막 값만** 필드 원 + 값 라벨. 여러 줄 `:::data` = 여러 series 오버레이.
+- **선호 순서**: 단일 비교면 bar > dumbbell > dot plot. 분포면 donut > pie. 트렌드면 sparkline > line. 작은 슬라이스 (<3%) 는 "기타" 로 묶는 걸 권장 — 자동화는 하지 않음.
+
 ## Image strategy — placeholder > botched attempt
 
 실물 이미지가 필요한 슬라이드에서 AI 생성 결과가 어색하면, **프롬프트 재조정으로 루프 돌지 말고 placeholder 로 되돌아간 뒤 실물을 구하는 것이 빠르다**.
