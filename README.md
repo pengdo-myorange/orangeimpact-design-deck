@@ -164,13 +164,17 @@ Claude: --pdf 플래그로 다시 빌드합니다…
 | | |
 |---|---|
 | 🎨 **17개 레이아웃** | title · section · part-cover · statement · toc · content · two-column · quote · image · big-number · stats · chart · compare · bento · chain · timeline · process · profile · prompt-demo · checkpoint-rows · closing |
-| 📦 **단일 자립형 HTML** | Pretendard·로고·이미지 모두 base64 임베드 (~3-5MB). 오프라인 동작, 인터넷 없는 곳에서도 재생 가능 |
+| 🎭 **9개 aesthetic family** | `family:` 한 줄로 Linear/NVIDIA/Apple/A24 등 9가지 톤 프리셋 전환 |
+| 🍩 **네이티브 차트** | donut 중앙 라벨 + 2단 bilingual 범례 + ODS 컬러 alias. pie / bar / stackedbar / dumbbell |
+| 🔶 **인라인 오렌지 강조** | `==text==` 한 단어 강조 — 샘플 덱 (p10/p13/p14) 톤 |
+| 📦 **단일 자립형 HTML** | Pretendard·로고·이미지 모두 base64 임베드 (~3-5MB). 오프라인 동작 |
 | 🖨️ **헤드리스 PDF** | `--pdf` 한 줄로 1920×1080·슬라이드당 1페이지 PDF. Playwright 우선, 없으면 Chrome headless 폴백 |
 | 🤖 **AI 이미지 생성** | `![캡션](ai:"프롬프트")` 한 줄로 OpenAI gpt-image-2 호출. SHA-256 캐시로 재빌드 시 0원 |
 | 🎯 **Brand sidecar** | `brand.md` 한 파일로 accent·typography·radius·shadow 오버라이드. DESIGN.md v2 호환 |
 | 🚫 **8 anti-slop 룰** | emoji·가짜 stats·gradient·teal default·blinking dot·icon stack 등 자동 검사 |
 | ⭐ **Critique 모드** | 5축 비평 슬라이더 (철학/계층/디테일/기능/창의) + 3-designer-debate 노트 |
 | ✅ **자동 검증** | `--verify` 로 빌드 후 슬라이드 수·폰트 임베드·@page 규칙 자동 점검 |
+| 🖋️ **타이포그래피 폴리시** | `text-wrap: pretty` 로 고아 단어 자동 방지 (Chrome 114+ / Safari 17.4+) |
 
 ## 마크다운 문법
 
@@ -190,6 +194,17 @@ date: 2026-04-23
 theme: light
 ---
 ```
+
+### 인라인 서식
+
+| 문법 | 렌더 |
+|---|---|
+| `**bold**` / `__bold__` | **검정 bold** |
+| `*italic*` / `_italic_` | *italic* |
+| `` `code` `` | `code` |
+| `[text](url)` | 링크 |
+| `==text==` | **오렌지 bold 강조** — 샘플 덱의 "관찰자"/"참여자"/"AI의 출발선" 톤. 슬라이드당 1–2 단어 권장. |
+| `[label]{.chip-orange}` | inline chip pill (`orange` \| `blue` \| `gray`). chip-table / note 안에서 자주 사용. |
 
 ### 슬라이드 디렉티브
 
@@ -240,6 +255,31 @@ theme: light
 ```
 
 전체 문법은 [`examples/all-layouts.md`](examples/all-layouts.md) — 17개 레이아웃을 한 번에 보여주는 24장 데모.
+
+### 차트 (`layout: chart`)
+
+```markdown
+<!-- layout: chart -->
+<!-- chart: donut -->  <!-- donut | pie | bar | stackedbar | dumbbell -->
+# 슬라이드 제목
+
+## OpenAI          <!-- donut 중앙 라벨 (bold) -->
+4 categories       <!-- donut 중앙 서브라벨 -->
+
+:::data
+자동화 위험 / Automation-exposed   | 18 | orange-dark
+재구성 / Reshaped                  | 24 | orange
+성장 / Growth                      | 12 | blue
+단기 영향 적음 / Minimally-affected | 46 | gray
+:::
+```
+
+**데이터 행 문법**: `label [/ 보조라벨] | value [| value2] | color` — 공백 구분.
+
+- **컬러 alias** (컬러 열에 사용): `orange`, `orange-dark`, `orange-light`, `blue`, `blue-dark`, `gray`, `gray-light`, `black` — 모두 ODS CSS 변수로 resolve. raw hex (`#FF6F1F`) 도 그대로 통과.
+- **Donut/Pie** 는 값에 `%` 자동 추가.
+- **Donut 중앙 라벨**: 슬라이드에 H1 아래 `## 서브타이틀` + paragraph 가 있으면 도넛 구멍 한가운데에 bold + 회색 2행으로 배치.
+- **범례 2단 라벨**: 라벨에 `/` 가 있으면 (주라벨 bold / 보조라벨 작은 회색) 2행 스택으로 렌더.
 
 ## CLI
 
@@ -370,7 +410,7 @@ design-deck/
 
 | 프로젝트 | 우리가 가져온 것 |
 |---|---|
-| **[alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design)** | showcase-first 워크플로 (5장 이상 덱은 톤부터 검증), 5축 critique 패널, 17-layout showcase 구조, 5개 baseline anti-slop 룰 |
+| **[alchaincyf/huashu-design](https://github.com/alchaincyf/huashu-design)** | showcase-first 워크플로 (5장 이상 덱은 톤부터 검증), 5축 critique 패널, 17-layout showcase 구조, 5개 baseline anti-slop 룰, `text-wrap: pretty` 타이포 폴리시, placeholder-over-botched-attempt 이미지 철학, 5 학파 기반 fallback direction advisor |
 | **[rohitg00/awesome-claude-design](https://github.com/rohitg00/awesome-claude-design)** | DESIGN.md v2 사양, 9개 aesthetic family 카탈로그, 8개 anti-slop fingerprint 중 3개 (teal default · blinking dot · icon stack), remix recipes 패턴, 3-designer-debate 비평 |
 | **[Anthropic frontend aesthetics cookbook](https://github.com/anthropics/claude-cookbooks/blob/main/coding/prompting_for_frontend_aesthetics.ipynb)** | "NEVER use generic AI-generated aesthetics" 베이스라인 룰 — Inter/Roboto/system font, 보라색 그라디언트, 쿠키 커터 레이아웃 회피의 기준점 |
 
