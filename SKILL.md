@@ -75,6 +75,15 @@ allowed-tools:
 
 슬라이드 시작에 `<!-- lint: off -->` 추가 시 해당 슬라이드 검사 건너뜀.
 
+## Image strategy — placeholder > botched attempt
+
+실물 이미지가 필요한 슬라이드에서 AI 생성 결과가 어색하면, **프롬프트 재조정으로 루프 돌지 말고 placeholder 로 되돌아간 뒤 실물을 구하는 것이 빠르다**.
+
+- `--mode draft` / `--no-image-gen` 에서 자동으로 회색 박스 + prompt 텍스트 + 사이즈 라벨 렌더 (`placeholderSvg` in [lib/image-gen.js](lib/image-gen.js))
+- AI 이미지가 3번 재생성해도 별로면 → 해당 슬라이드만 `--no-image-gen` 으로 빌드해 placeholder 화 → Wikimedia/Unsplash/유저 자산에서 실물 찾아 `![alt](path)` 로 삽입
+- 실물을 못 구할 경우 placeholder 유지. "자리는 있지만 내용이 공사 중" 이 "AI slop" 보다 **항상 더 프로페셔널**
+- 리뷰 오버레이에서 "실행 디테일" 0–10점을 매길 때도 이 차이를 구별해서 채점: 실물 부재=중립, AI slop=감점
+
 ## CLI reference
 
 ```
