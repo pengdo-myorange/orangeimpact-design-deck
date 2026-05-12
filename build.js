@@ -19,6 +19,8 @@ import { clearCache } from "./lib/image-gen.js";
 import { lintDeck, formatWarnings } from "./lib/lint.js";
 import { buildPDF } from "./lib/pdf.js";
 import { verify, formatVerify } from "./lib/verify.js";
+import { routeDeck, injectGeneratedImages } from "./lib/visual-router.js";
+import { applyCandidates, formatPendingReport } from "./lib/notebooklm-bridge.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -69,6 +71,9 @@ Options:
   --verify                 Run verification after build
   --strict                 Fail build on lint warnings
   --critique               Same as --verify (kept for compat)
+  --no-concept-image-auto  Disable visual-router → concept-image routing
+  --no-infographic-auto    Disable NotebookLM infographic candidate detection
+  --infographics-dir <path> Where NotebookLM PNGs live (default: ./infographics)
 `);
 }
 
@@ -150,6 +155,46 @@ async function main() {
   const ds = resolveDesignSystem({ flag: args["design-system"], mdDir, skillDir: __dirname });
   const { odsCss, deckCss, fontB64, logoSvg, logoSvgWhite } = loadODS(ds);
 
+  // 3.5) Visual router — classify each implicit slide into the best layout.
+  // This auto-routes abstract bodies into `concept-image` and data-rich
+  // bodies into `infographic` (NotebookLM handoff). Explicit `<!-- layout: -->`
+  // directives always win. Disable with `--no-concept-image-auto` or
+  // `--no-infographic-auto`.
+  const routerOpts = {
+    conceptImageAuto: !args["no-concept-image-auto"],
+    infographicAuto: !args["no-infographic-auto"],
+  };
+  const routing = routeDeck(slides, routerOpts);
+  const implicitRoutes = routing.decisions.filter((d) => !d.explicit && d.from !== d.to);
+  if (implicitRoutes.length) {
+    console.log(`🧭 visual-router: ${implicitRoutes.length} implicit route(s)`);
+    for (const d of implicitRoutes.slice(0, 8)) {
+      console.log(`   slide ${d.slideIndex + 1}: ${d.from} → ${d.to}  (${d.reasons.join("; ")})`);
+    }
+    if (implicitRoutes.length > 8) console.log(`   … +${implicitRoutes.length - 8} more`);
+  }
+
+  // 3.6) NotebookLM infographic bridge — for slides routed as "infographic",
+  // swap in a user-supplied PNG if it exists; otherwise emit a prompt for
+  // the author to paste into NotebookLM. Builds keep working either way.
+  const infographicsDir = path.resolve(args["infographics-dir"] || path.join(mdDir, "infographics"));
+  const ngHandoff = applyCandidates(slides, { infographicsDir });
+  if (ngHandoff.applied.length) {
+    console.log(`📊 notebooklm-bridge: injected ${ngHandoff.applied.length} infographic PNG(s)`);
+  }
+  if (ngHandoff.pending.length) {
+    console.log(formatPendingReport(ngHandoff.pending));
+  }
+
+  // 3.7) Auto-inject AI image tokens for cover & concept-image slides that
+  // don't already carry an image. Required so inlineImages can call
+  // gpt-image-2 (kind=cover / kind=concept) with the orange-blog-img
+  // STYLE_RULES baked in.
+  const injected = injectGeneratedImages(slides);
+  if (injected.length) {
+    console.log(`🎨 image-injector: prepared ${injected.length} AI image prompt(s) for cover/concept slides`);
+  }
+
   // 4) Lint
   const warnings = lintDeck(slides, { accent: fm.accent });
   if (warnings.length) {
@@ -191,7 +236,8 @@ async function main() {
 
   // 7) Inline images (always — placeholder if draft/no-image-gen)
   const apiKey = process.env.OPENAI_API_KEY || "";
-  const imgStats = await inlineImages(slides, { mdDir, mode, cacheDir, openaiKey: apiKey, noImageGen });
+  const focalColor = fm.cover_focal || fm.accent_hex || "#FF6F1F";
+  const imgStats = await inlineImages(slides, { mdDir, mode, cacheDir, openaiKey: apiKey, noImageGen, focalColor });
 
   // 8) Cost confirm in final mode if there are real generations
   if (mode === "final" && imgStats.generated > 0 && !args.yes && !args["images-only"]) {

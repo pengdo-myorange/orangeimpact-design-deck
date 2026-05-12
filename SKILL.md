@@ -1,6 +1,6 @@
 ---
 name: design-deck
-description: Convert a markdown file to a 1920x1080 HTML slide deck styled with the Orangeimpact Design System, ready to print as a multi-page PDF (one slide per page). Use when the user gives you a .md file and asks for slides, a deck, a presentation, or PDF slides. Supports 17 layouts, OpenAI gpt-image-2 image generation, headless Chrome auto-PDF, and a review overlay for iteration.
+description: Convert a markdown file to a 1920x1080 HTML slide deck styled with the Orangeimpact Design System, ready to print as a multi-page PDF (one slide per page). Use when the user gives you a .md file and asks for slides, a deck, a presentation, or PDF slides. Supports 20+ layouts, OpenAI gpt-image-2 image generation (full-bleed cover slides + concept body images with orange-blog-img brand rules), NotebookLM infographic handoff, im-not-ai Korean authoring rules baked into draft generation, headless Chrome auto-PDF, and an interactive storyboard overlay for full-flow approval before final build.
 user-invocable: true
 allowed-tools:
   - Bash
@@ -20,6 +20,41 @@ allowed-tools:
 - 사용자가 `.md` 파일을 주고 "슬라이드", "덱", "발표 자료", "PDF 발표자료"를 요청할 때
 - 기존 `.md` 을 다듬어 다시 빌드하거나 특정 슬라이드만 수정할 때
 
+## Authoring rules (작성 시점부터 적용)
+
+한국어 슬라이드 본문·헤드라인·스피커 노트·이미지 캡션·CTA 카피의 **초안을 작성하는 순간부터** `prompts/slide-authoring-rules.md` 의 im-not-ai 규칙 ([epoko77-ai/im-not-ai](https://github.com/epoko77-ai/im-not-ai)) 을 따른다. 사후 윤문 패스 없음.
+
+핵심 금지 패턴 (전체는 `prompts/slide-authoring-rules.md` 참조):
+- "~를 통해", "~에 대해", 이중 피동 ("되어지", "보여지")
+- "결론적으로", "시사하는 바", "본 발표에서는"
+- 기계적 "첫째 / 둘째 / 셋째" 동시 등장
+- "것이다 / 점이다 / 바이다" 형식명사 반복
+- 형용사 연쇄, 헤지 중첩, 접속사 남발
+
+빌드 시 `lib/lint.js` 가 S1 패턴 잔존 여부를 검사 (`ai-tell-d`, `ai-tell-a-passive`, `ai-tell-c-mech`, `ai-tell-i-formal`).
+
+## Visual routing (자동)
+
+`lib/visual-router.js` 가 모든 본문 슬라이드를 분류해 최적 레이아웃을 결정 (명시적 `<!-- layout: -->` 지시는 항상 우선):
+
+| 슬라이드 특성 | 라우팅 결과 |
+|---|---|
+| 수치 ≥6 또는 단계 ≥5 | `infographic` (NotebookLM 핸드오프) |
+| 수치 ≥4 | `chart` (Tufte) |
+| 순서 단계 ≥3 | `process` |
+| 비유·추상 키워드 비중 ↑ | **`concept-image`** (gpt-image-2 자동 생성) |
+| 단순 텍스트 | `content` |
+
+비활성: `--no-concept-image-auto`, `--no-infographic-auto`.
+
+## Image generation (gpt-image-2)
+
+- **커버 슬라이드 (`part-cover`)**: 항상 **이미지 전용** — 텍스트·도형·로고 없이 풀-블리드 gpt-image-2 이미지 한 장. 프롬프트는 헤딩에서 자동 추출되고 [orange-blog-img](https://github.com/kimharin-mujae/orange-blog-img) STYLE_RULES 가 자동 부착 (검정 #000000 + 오렌지 #FF6F1F + 미니멀 아이콘). 수동 오버라이드: `<!-- cover-prompt: "..." -->`.
+- **개념 본문 (`concept-image`)**: 좌측 텍스트 + 우측 gpt-image-2 이미지. `image_full: true` frontmatter 로 풀블리드 전환. 수동 오버라이드: `<!-- concept-prompt: "..." -->`.
+- **인포그래픽 (`infographic`)**: NotebookLM 반자동 핸드오프. 빌드 시 후보 슬라이드용 NotebookLM 프롬프트가 stdout 으로 출력됨 → 사용자가 NotebookLM Visual Overview 에 붙여넣고 PNG 를 `./infographics/slide-N.png` 에 저장 → 다음 빌드에서 자동 삽입.
+
+브랜드 컬러 오버라이드: frontmatter `cover_focal: "#hex"` 또는 `brand.md` 의 `accent_hex`.
+
 ## Core workflow
 
 1. **Input resolution.** 사용자 메시지에서 `.md` 경로 확인. 없으면 한 문장으로 물어본다.
@@ -35,11 +70,17 @@ allowed-tools:
      - `cinematic-dark` (NVIDIA/RunwayML) · `playful-color` (Figma/Duolingo) · `glass-futurism` (Apple/Arc) · `neon-brutalist` (The Verge/PlayStation) · `indie-cult` (Granola/Criterion)
      - 지정 안 하면 기본 ODS 톤 그대로. family 선택이 애매하면 `prompts/family-picker.md` 실행.
 4. **API key check.** md 파일에 `ai:` 이미지 레퍼런스가 있으면 `$OPENAI_API_KEY` 존재 확인. 없으면 사용자에게 안내하거나 `--no-image-gen` 추천.
-5. **Phase 0 (≥5장 덱일 때만) — Showcase first:**
+5. **Phase 0 — 인터랙티브 스토리보드 (전체 흐름 + 파트별 승인):**
    ```bash
-   node ~/.claude/skills/design-deck/build.js <input.md> --showcase --mode draft
+   node ~/.claude/skills/design-deck/build.js <input.md> --mode draft --verify
    ```
-   2장(가장 다른 레이아웃 두 개)만 빌드해 `<input>.showcase.html` 출력. 사용자에게 "이 그래머(색·간격·타이포 톤)가 맞나요?" 확인 후에만 일괄 빌드. 방향 잘못 잡고 50장 다 그리는 비용을 회피.
+   ↓ `deck.html` 을 열고 좌측 하단 `[스토리보드]` 버튼 클릭 → 4×N 썸네일 그리드:
+   - **드래그**로 슬라이드 순서 변경
+   - 각 슬라이드 하단에 **인라인 코멘트** (자연어 수정 지시)
+   - **파트 단위 일괄 승인** — `# Part N:` 헤딩이 있는 슬라이드는 자동으로 파트 그룹화
+   - **`approve all`** 버튼 → `storyboard.yaml` 다운로드 → 다음 빌드의 입력으로 사용
+   - 이미지는 placeholder 라서 ~10초 내 빌드, gpt-image-2 비용 없음
+   - 이 단계 통과 후에만 최종 빌드 (Phase 9) 로 진행
 6. **Phase 1 — 일괄 드래프트 빌드:**
    ```bash
    node ~/.claude/skills/design-deck/build.js <input.md> --mode draft --verify
@@ -119,6 +160,9 @@ Options:
   --verify                  빌드 후 자동 검증 (슬라이드 수, 폰트, @page, console 에러)
   --strict                  lint warning 1건이라도 있으면 빌드 실패
   --critique                --verify alias
+  --no-concept-image-auto   visual-router 의 concept-image 자동 라우팅 비활성
+  --no-infographic-auto     NotebookLM 인포그래픽 후보 탐지 비활성
+  --infographics-dir <path> NotebookLM PNG 경로 (기본: ./infographics)
 ```
 
 ## Markdown syntax (cheat sheet)
